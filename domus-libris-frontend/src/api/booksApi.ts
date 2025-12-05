@@ -9,30 +9,8 @@ export type CreateBookPayload = Pick<Book, 'title' | 'author' | 'isbn'> &
 export type UpdateBookPayload = Partial<CreateBookPayload>;
 
 export async function getBooks(): Promise<Book[]> {
-    const response = await apiClient.get<ApiResponse<Book[]> | Book[]>('/books');
-    const data = response.data as any;
-
-    if (Array.isArray(data?.data)) {
-        return (data as ApiResponse<Book[]>).data;
-    }
-
-    if (Array.isArray(data)) {
-        return data as Book[];
-    }
-
-    console.warn('Unexpected API shape for GET /books:', data);
-    return [];
-}
-
-export async function createBook(payload: Omit<Book, 'id'>): Promise<Book> {
-    const response = await apiClient.post<ApiResponse<Book> | Book>('/books', payload);
-    const data = response.data as any;
-
-    if (data?.data) {
-        return (data as ApiResponse<Book>).data;
-    }
-
-    return data as Book;
+    const response = await apiClient.get<ApiResponse<Book[]>>('/books');
+    return response.data.data;
 }
 
 export async function createBook(payload: CreateBookPayload): Promise<Book> {
