@@ -4,7 +4,10 @@ import type { FormEvent } from 'react';
 import axios from 'axios';
 import { getBooks, createBook, deleteBook } from '../api/booksApi';
 import type { Book } from '../types/book';
-import { isLoggedIn } from '../auth/auth';
+import { isAdmin, isLoggedIn } from '../auth/auth';
+import { StatusTag, type BookStatus } from '../components/Books/StatusTag';
+
+type BookWithStatus = Book & { status?: BookStatus };
 
 export function BooksPage() {
     const [books, setBooks] = useState<Book[]>([]);
@@ -18,6 +21,9 @@ export function BooksPage() {
 
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
+    const admin = isAdmin();
+    const loggedIn = isLoggedIn();
+
     async function loadBooks() {
         try {
             setIsLoading(true);
@@ -26,7 +32,7 @@ export function BooksPage() {
             const data = await getBooks();
             console.log('Books from API:', data);
             setBooks(data);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Error loading books:', err);
             if (axios.isAxiosError(err)) {
                 setError(
@@ -58,7 +64,7 @@ export function BooksPage() {
             setAuthor('');
             setIsbn('');
             await loadBooks();
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Error creating book:', err);
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
@@ -85,7 +91,7 @@ export function BooksPage() {
             setError(null);
             await deleteBook(id);
             await loadBooks();
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Error deleting book:', err);
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 401) {
@@ -104,58 +110,83 @@ export function BooksPage() {
         }
     }
 
-    console.log('Auth status in BooksPage:', isLoggedIn());
+    const resolveStatus = (book: Book): BookStatus => {
+        const maybeStatus = (book as BookWithStatus).status;
+        if (
+            maybeStatus === 'available' ||
+            maybeStatus === 'loaned' ||
+            maybeStatus === 'reserved' ||
+            maybeStatus === 'lost' ||
+            maybeStatus === 'missing'
+        ) {
+            return maybeStatus;
+        }
+
+        // TODO: replace with real status from API once available
+        return 'available';
+    };
 
     return (
-        <div className="space-y-4">
-            <h1 className="text-xl font-semibold text-slate-900">Books</h1>
+        <div className="space-y-6 text-base leading-relaxed text-slate-900">
+            <div className="space-y-2">
+                <h1 className="text-2xl font-semibold text-brand-primary">
+                    Books catalog
+                </h1>
+                <p className="text-sm text-slate-600">
+                    Browse the full catalog. Admins can add, edit, or remove titles.
+                </p>
+                <p className="text-xs text-slate-500">
+                    Auth status: {loggedIn ? 'Logged in' : 'Not logged in'}
+                </p>
+            </div>
 
-            <p className="text-xs text-slate-500">
-                Auth status: {isLoggedIn() ? 'Logged in' : 'Not logged in'}
-            </p>
-
-            {/* Create form */}
-            <form
-                onSubmit={handleCreate}
-                className="space-y-3 rounded-lg bg-white p-4 shadow-sm"
-            >
-                <h2 className="text-sm font-semibold text-slate-800">
-                    Add a new book
-                </h2>
-                <div className="grid gap-3 md:grid-cols-3">
-                    <input
-                        className="rounded border border-slate-300 px-2 py-1 text-sm"
-                        placeholder="Title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="rounded border border-slate-300 px-2 py-1 text-sm"
-                        placeholder="Author"
-                        value={author}
-                        onChange={(e) => setAuthor(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="rounded border border-slate-300 px-2 py-1 text-sm"
-                        placeholder="ISBN"
-                        value={isbn}
-                        onChange={(e) => setIsbn(e.target.value)}
-                        required
-                    />
+            {admin && (
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <form onSubmit={handleCreate} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-sm font-semibold text-brand-primary">
+                                Add a new book
+                            </h2>
+                            <span className="rounded bg-brand-tertiary/30 px-2 py-0.5 text-[11px] font-medium text-brand-primary">
+                                Admin tools
+                            </span>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-3">
+                            <input
+                                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                                placeholder="Title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                            />
+                            <input
+                                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                                placeholder="Author"
+                                value={author}
+                                onChange={(e) => setAuthor(e.target.value)}
+                                required
+                            />
+                            <input
+                                className="rounded border border-slate-300 px-3 py-2 text-sm"
+                                placeholder="ISBN"
+                                value={isbn}
+                                onChange={(e) => setIsbn(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                        >
+                            {isSubmitting ? 'Saving…' : 'Save book'}
+                        </button>
+                    </form>
                 </div>
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="rounded bg-slate-900 px-3 py-1 text-sm font-medium text-white disabled:opacity-60"
-                >
-                    {isSubmitting ? 'Saving…' : 'Save book'}
-                </button>
-            </form>
+            )}
 
             {isLoading && (
-                <p className="text-sm text-slate-500">Loading books...</p>
+                <p className="text-sm text-slate-600">Loading books...</p>
             )}
 
             {error && (
@@ -163,49 +194,55 @@ export function BooksPage() {
             )}
 
             {!isLoading && !error && books.length === 0 && (
-                <p className="text-sm text-slate-500">No books found.</p>
+                <p className="text-sm text-slate-600">No books found.</p>
             )}
 
             {!isLoading && !error && books.length > 0 && (
-                <table className="min-w-full divide-y divide-slate-200 bg-white shadow-sm text-sm">
-                    <thead className="bg-slate-100 text-left font-semibold">
-                        <tr>
-                            <th className="px-4 py-2">Title</th>
-                            <th className="px-4 py-2">Author</th>
-                            <th className="px-4 py-2">ISBN</th>
-                            <th className="px-4 py-2 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {books.map((book) => (
-                            <tr key={book.id}>
-                                <td className="px-4 py-2">{book.title}</td>
-                                <td className="px-4 py-2">{book.author}</td>
-                                <td className="px-4 py-2">{book.isbn}</td>
-                                <td className="px-4 py-2 text-right">
-                                    {/* Edit will come later */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDelete(book.id)}
-                                        disabled={deletingId === book.id}
-                                        className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 disabled:opacity-60"
-                                    >
-                                        {deletingId === book.id ? 'Deleting…' : 'Delete'}
-                                    </button>
-                                </td>
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <table className="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                            <tr>
+                                <th className="px-4 py-2">Title</th>
+                                <th className="px-4 py-2">Author</th>
+                                <th className="px-4 py-2">ISBN</th>
+                                <th className="px-4 py-2">Status</th>
+                                {admin && (
+                                    <th className="px-4 py-2 text-right">Actions</th>
+                                )}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {books.map((book) => (
-                                <tr key={book.id}>
-                                    <td className="px-4 py-2">{book.title}</td>
-                                    <td className="px-4 py-2">{book.author}</td>
-                                    <td className="px-4 py-2">{book.isbn}</td>
-                                </tr>
-                            ))}
+                            {books.map((book) => {
+                                const status = resolveStatus(book);
+
+                                return (
+                                    <tr key={book.id}>
+                                        <td className="px-4 py-2">{book.title}</td>
+                                        <td className="px-4 py-2">{book.author}</td>
+                                        <td className="px-4 py-2">{book.isbn}</td>
+                                        <td className="px-4 py-2">
+                                            <StatusTag status={status} />
+                                        </td>
+                                        {admin && (
+                                            <td className="px-4 py-2 text-right">
+                                                {/* Edit will come later */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(book.id)}
+                                                    disabled={deletingId === book.id}
+                                                    className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+                                                >
+                                                    {deletingId === book.id ? 'Deleting…' : 'Delete'}
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
-                )}
-            </div>
-        );
-    }
+                </div>
+            )}
+        </div>
+    );
+}
