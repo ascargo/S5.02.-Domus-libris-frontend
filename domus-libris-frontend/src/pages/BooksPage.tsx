@@ -194,10 +194,18 @@ export function BooksPage() {
                                     </button>
                                 </td>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
-    );
-}
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {books.map((book) => (
+                                <tr key={book.id}>
+                                    <td className="px-4 py-2">{book.title}</td>
+                                    <td className="px-4 py-2">{book.author}</td>
+                                    <td className="px-4 py-2">{book.isbn}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+        );
+    }
