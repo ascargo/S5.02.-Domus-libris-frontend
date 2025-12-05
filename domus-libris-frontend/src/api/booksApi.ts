@@ -20,7 +20,10 @@ export async function getBooks(): Promise<Book[]> {
 }
 
 export async function createBook(payload: Omit<Book, 'id'>): Promise<Book> {
-    const response = await apiClient.post<ApiResponse<Book> | Book>('/books', payload);
+    const response = await apiClient.post<ApiResponse<Book> | Book>(
+        '/books',
+        payload
+    );
     const data = response.data as any;
 
     if (data?.data) {
@@ -28,4 +31,25 @@ export async function createBook(payload: Omit<Book, 'id'>): Promise<Book> {
     }
 
     return data as Book;
+}
+
+export async function updateBook(
+    id: number,
+    payload: Partial<Omit<Book, 'id'>>
+): Promise<Book> {
+    const response = await apiClient.put<ApiResponse<Book> | Book>(
+        `/books/${id}`,
+        payload
+    );
+    const data = response.data as any;
+
+    if (data?.data) {
+        return (data as ApiResponse<Book>).data;
+    }
+
+    return data as Book;
+}
+
+export async function deleteBook(id: number): Promise<void> {
+    await apiClient.delete(`/books/${id}`);
 }
