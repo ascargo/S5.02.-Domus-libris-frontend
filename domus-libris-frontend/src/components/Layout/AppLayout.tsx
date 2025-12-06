@@ -52,6 +52,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                         <Link to="/books" className="hover:text-slate-200">
                             Books
                         </Link>
+                        {authenticated && (
+                            <Link to="/dashboard" className="hover:text-slate-200">
+                                Dashboard
+                            </Link>
+                        )}
 
                         {!authenticated && (
                             <Link to="/login" className="hover:text-slate-200">
