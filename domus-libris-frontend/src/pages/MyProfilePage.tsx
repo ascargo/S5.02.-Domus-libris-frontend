@@ -1,5 +1,5 @@
 // src/pages/MyProfilePage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import {
     getMyPatronProfile,
@@ -9,19 +9,20 @@ import {
 import { getMyLoans } from '../api/loansApi';
 import type { Patron } from '../types/patron';
 import type { Loan } from '../types/loan';
-import { isLoggedIn } from '../auth/auth';
+import { getCurrentUser, isLoggedIn } from '../auth/auth';
 import { Link } from 'react-router-dom';
 
 export function MyProfilePage() {
     const authed = isLoggedIn();
+    const storedUser = useMemo(() => getCurrentUser(), []);
     const [profile, setProfile] = useState<Patron | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [name, setName] = useState(storedUser?.name ?? '');
+    const [email, setEmail] = useState(storedUser?.email ?? '');
     const [myLoans, setMyLoans] = useState<Loan[]>([]);
     const [loansLoading, setLoansLoading] = useState(false);
     const [loansError, setLoansError] = useState<string | null>(null);
@@ -33,9 +34,20 @@ export function MyProfilePage() {
                 setIsLoading(true);
                 setError(null);
                 const data = await getMyPatronProfile();
-                setProfile(data);
-                setName(data.name);
-                setEmail(data.email);
+                if (storedUser && data.email !== storedUser.email) {
+                    const normalized = {
+                        ...data,
+                        name: storedUser.name,
+                        email: storedUser.email,
+                    };
+                    setProfile(normalized);
+                    setName(storedUser.name);
+                    setEmail(storedUser.email);
+                } else {
+                    setProfile(data);
+                    setName(data.name);
+                    setEmail(data.email);
+                }
             } catch (err: unknown) {
                 console.error('Error loading profile:', err);
                 if (axios.isAxiosError(err)) {
@@ -52,7 +64,7 @@ export function MyProfilePage() {
             }
         }
         loadProfile();
-    }, [authed]);
+    }, [authed, storedUser]);
 
     useEffect(() => {
         if (!authed) return;
