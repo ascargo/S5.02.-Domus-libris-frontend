@@ -7,7 +7,8 @@ export type CreatePatronPayload = Omit<Patron, 'id'>;
 export type UpdatePatronPayload = Partial<CreatePatronPayload>;
 
 export async function getPatrons(): Promise<Patron[]> {
-    const response = await apiClient.get<ApiResponse<Patron[]>>('/patrons');
+    // Request a larger page size to surface more entries client-side
+    const response = await apiClient.get<ApiResponse<Patron[]>>('/patrons?per_page=100');
     return response.data.data;
 }
 
