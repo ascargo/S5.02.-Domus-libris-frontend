@@ -4,7 +4,7 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { login } from '../api/authApi';
-import { setToken } from '../auth/auth';
+import { setCurrentUser, setToken } from '../auth/auth';
 
 export function LoginPage() {
     const navigate = useNavigate();
@@ -25,8 +25,8 @@ export function LoginPage() {
             console.log('Login result:', result);
 
             setToken(result.token);
+            setCurrentUser(result.user);
 
-            // later we can store user in context if needed
             navigate('/books');
         } catch (err) {
             console.error('Login error:', err);

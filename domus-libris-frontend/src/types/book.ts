@@ -8,4 +8,5 @@ export interface Book {
     collection?: string;
     location?: string;
     cover_path?: string;
+    status?: string;
 }

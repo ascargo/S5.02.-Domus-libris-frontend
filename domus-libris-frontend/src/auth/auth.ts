@@ -55,6 +55,11 @@ export function isAdmin(): boolean {
     return !!user && user.role === 'admin';
 }
 
+export function isPatron(): boolean {
+    const user = getCurrentUser();
+    return !!user && user.role === 'patron';
+}
+
 export function clearAuth(): void {
     setToken(null);
     setCurrentUser(null);

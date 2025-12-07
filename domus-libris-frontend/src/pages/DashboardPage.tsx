@@ -4,13 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getDashboardSummary } from '../api/dashboardApi';
 import type { DashboardSummary } from '../api/dashboardApi';
-import { isLoggedIn } from '../auth/auth';
+import { getMyLoans } from '../api/loansApi';
+import type { Loan } from '../types/loan';
+import { isLoggedIn, isPatron } from '../auth/auth';
 
 export function DashboardPage() {
     const navigate = useNavigate();
     const [data, setData] = useState<DashboardSummary | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [myLoans, setMyLoans] = useState<Loan[] | null>(null);
+    const [isLoadingMyLoans, setIsLoadingMyLoans] = useState(false);
+    const [myLoansError, setMyLoansError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isLoggedIn()) {
@@ -24,6 +29,20 @@ export function DashboardPage() {
                 setError(null);
                 const summary = await getDashboardSummary();
                 setData(summary);
+                if (isPatron()) {
+                    setIsLoadingMyLoans(true);
+                    try {
+                        const loans = await getMyLoans();
+                        setMyLoans(loans);
+                    } catch (loanErr: unknown) {
+                        console.error('Error loading my loans:', loanErr);
+                        setMyLoansError(
+                            'Could not load your loans right now. Please try again later.'
+                        );
+                    } finally {
+                        setIsLoadingMyLoans(false);
+                    }
+                }
             } catch (err: unknown) {
                 console.error('Error loading dashboard:', err);
                 if (axios.isAxiosError(err)) {
@@ -62,6 +81,14 @@ export function DashboardPage() {
 
             {!isLoading && !error && data && (
                 <div className="space-y-4">
+                    {isPatron() && (
+                        <PatronLoansSection
+                            loans={myLoans}
+                            isLoading={isLoadingMyLoans}
+                            error={myLoansError}
+                        />
+                    )}
+
                     <StatsBar summary={data} />
 
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -152,6 +179,119 @@ function DashboardCard({ title, value, accent }: DashboardCardProps) {
             </div>
         </div>
     );
+}
+
+interface PatronLoansSectionProps {
+    loans: Loan[] | null;
+    isLoading: boolean;
+    error: string | null;
+}
+
+function PatronLoansSection({ loans, isLoading, error }: PatronLoansSectionProps) {
+    const activeLoans = (loans ?? []).filter(
+        (loan) => !(loan.return_date ?? loan.returned_at)
+    );
+    const activeCount = activeLoans.length;
+    const list = activeLoans.slice(0, 5);
+
+    return (
+        <section className="rounded-xl bg-white shadow-sm border border-slate-200 p-4 space-y-3">
+            <div className="space-y-1">
+                <h2 className="text-sm font-semibold text-brand-primary">
+                    Your active loans
+                </h2>
+                <p className="text-xs text-slate-600">
+                    Loans you currently have checked out.
+                </p>
+            </div>
+
+            {isLoading && (
+                <p className="text-sm text-slate-600">Loading your loans...</p>
+            )}
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            {!isLoading && !error && (
+                <>
+                    <p className="text-sm text-slate-700">
+                        {activeCount === 0
+                            ? 'You have no active loans 🧘‍♀️'
+                            : `You currently have ${activeCount} active loan${activeCount === 1 ? '' : 's'}.`}
+                    </p>
+
+                    {list.length > 0 && (
+                        <div className="mt-2 space-y-3">
+                            {list.map((loan) => {
+                                const status = getLoanStatus(loan);
+                                const bookTitle = loan.book?.title || 'Untitled book';
+                                const dueDateValue = loan.due_date || loan.loan_date;
+                                const dueDate = dueDateValue
+                                    ? new Date(dueDateValue).toLocaleDateString()
+                                    : '—';
+
+                                return (
+                                    <div
+                                        key={loan.id}
+                                        className="flex items-center justify-between gap-4 rounded-lg border border-slate-100 px-3 py-2 text-sm"
+                                    >
+                                        <div className="space-y-1">
+                                            <p className="font-medium text-brand-primary">
+                                                {bookTitle}
+                                            </p>
+                                            <p className="text-xs text-slate-600">
+                                                Due: {dueDate}
+                                            </p>
+                                        </div>
+                                        <LoanStatusPill label={status.label} variant={status.variant} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </>
+            )}
+        </section>
+    );
+}
+
+type LoanStatusVariant = 'overdue' | 'due-soon' | 'on-time';
+
+function getLoanStatus(loan: Loan): { label: string; variant: LoanStatusVariant } {
+    const today = new Date();
+    const dueRaw = loan.due_date || loan.loan_date;
+    if (!dueRaw) {
+        return { label: 'On time', variant: 'on-time' };
+    }
+
+    const due = new Date(dueRaw);
+    const diffMs = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (due < today) {
+        return { label: 'Overdue', variant: 'overdue' };
+    }
+
+    if (diffDays <= 3) {
+        return { label: 'Due soon', variant: 'due-soon' };
+    }
+
+    return { label: 'On time', variant: 'on-time' };
+}
+
+interface LoanStatusPillProps {
+    label: string;
+    variant: LoanStatusVariant;
+}
+
+function LoanStatusPill({ label, variant }: LoanStatusPillProps) {
+    const base = 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium';
+    const styles: Record<LoanStatusVariant, string> = {
+        overdue: 'bg-brand-secondary text-white',
+        'due-soon': 'bg-brand-softYellow text-brand-primary',
+        'on-time': 'bg-brand-softGreen text-brand-primary',
+    };
+
+    return <span className={`${base} ${styles[variant]}`}>{label}</span>;
 }
 
 interface StatsBarProps {
