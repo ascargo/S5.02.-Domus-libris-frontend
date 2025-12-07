@@ -10,13 +10,22 @@ export interface CreateLoanPayload {
     due_at: string;
 }
 
-export async function getLoans(): Promise<Loan[]> {
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans');
+type LoanQuery = {
+    page?: number;
+    per_page?: number | 'all';
+};
+
+export async function getLoans(params?: LoanQuery): Promise<Loan[]> {
+    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans', {
+        params,
+    });
     return response.data.data;
 }
 
-export async function getMyLoans(): Promise<Loan[]> {
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my');
+export async function getMyLoans(params?: LoanQuery): Promise<Loan[]> {
+    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my', {
+        params,
+    });
     return response.data.data;
 }
 

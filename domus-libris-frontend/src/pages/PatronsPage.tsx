@@ -103,7 +103,7 @@ export function PatronsPage() {
         }
     }
 
-    async function handleDelete(id: number, nameValue: string) {
+    async function handleDelete(id: number) {
         if (
             !window.confirm(
                 'Are you sure you want to delete this patron? This cannot be undone and will remove their access to the system.'
@@ -365,9 +365,7 @@ export function PatronsPage() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() =>
-                                                                handleDelete(patron.id, patron.name)
-                                                            }
+                                                            onClick={() => handleDelete(patron.id)}
                                                             disabled={deletingId === patron.id}
                                                             className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
                                                             aria-label={`Delete patron ${patron.name}`}

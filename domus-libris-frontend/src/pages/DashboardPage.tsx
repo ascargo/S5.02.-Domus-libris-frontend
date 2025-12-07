@@ -32,7 +32,7 @@ export function DashboardPage() {
                 if (isPatron()) {
                     setIsLoadingMyLoans(true);
                     try {
-                        const loans = await getMyLoans();
+                        const loans = await getMyLoans({ per_page: 'all' });
                         setMyLoans(loans);
                     } catch (loanErr: unknown) {
                         console.error('Error loading my loans:', loanErr);
