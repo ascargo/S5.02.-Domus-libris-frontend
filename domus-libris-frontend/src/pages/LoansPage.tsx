@@ -1,5 +1,6 @@
 // src/pages/LoansPage.tsx
 import { useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import axios from 'axios';
 import {
     getLoans,
@@ -23,12 +24,16 @@ export function LoansPage() {
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
-    const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+    const [editingLoan, setEditingLoan] = useState<Loan | null>(null);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
     const [bookSearch, setBookSearch] = useState('');
     const [patronSearch, setPatronSearch] = useState('');
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'ongoing' | 'returned' | 'lost' | 'overdue'>('all');
     const [formBookId, setFormBookId] = useState<number | ''>('');
     const [formPatronId, setFormPatronId] = useState<number | ''>('');
     const [formDueDate, setFormDueDate] = useState('');
@@ -42,7 +47,7 @@ export function LoansPage() {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await getLoans();
+            const data = await getLoans({ per_page: 'all' });
             setLoans(data);
         } catch (err: unknown) {
             console.error('Error loading loans:', err);
@@ -79,7 +84,26 @@ export function LoansPage() {
         }
     }
 
-    async function handleCreateLoan(e: React.FormEvent<HTMLFormElement>) {
+    function startEdit(loan: Loan) {
+        if (!admin || isSubmitting || deletingId) return;
+        setEditingLoan(loan);
+        setFormBookId(loan.book_id);
+        setFormPatronId(loan.patron_id);
+        setFormDueDate(loan.due_at ?? loan.due_date ?? '');
+        setFormLoanDate(loan.loaned_at ?? loan.loan_date ?? '');
+    }
+
+    function resetForm() {
+        setEditingLoan(null);
+        setFormBookId('');
+        setFormPatronId('');
+        setFormDueDate('');
+        setFormLoanDate('');
+        setFormError(null);
+        setSuccessMessage(null);
+    }
+
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (!formBookId || !formPatronId || !formDueDate) return;
         const payload: CreateLoanPayload = {
@@ -90,23 +114,30 @@ export function LoansPage() {
         };
         try {
             setIsSubmitting(true);
+            setFormError(null);
+            setSuccessMessage(null);
             setError(null);
-            await createLoan(payload);
-            setFormBookId('');
-            setFormPatronId('');
-            setFormDueDate('');
-            setFormLoanDate('');
+
+            if (editingLoan) {
+                await updateLoan(editingLoan.id, payload);
+                setSuccessMessage('Loan updated successfully.');
+            } else {
+                await createLoan(payload);
+                setSuccessMessage('Loan created successfully.');
+            }
+
+            resetForm();
             await loadLoans();
         } catch (err: unknown) {
             console.error('Error creating loan:', err);
             if (axios.isAxiosError(err)) {
-                setError(
+                setFormError(
                     `Could not create loan. ${
                         err.response?.data?.message ?? err.message
                     }${err.response ? ` (status ${err.response.status})` : ''}`
                 );
             } else {
-                setError('Could not create loan.');
+                setFormError('Could not create loan.');
             }
         } finally {
             setIsSubmitting(false);
@@ -170,7 +201,7 @@ export function LoansPage() {
     const filteredBooks = useMemo(() => {
         const term = bookSearch.toLowerCase();
         return books
-            .filter((b) => !b.status || b.status === 'available')
+            .filter((b) => (b.status ?? '').toLowerCase() === 'available')
             .filter((b) => b.title.toLowerCase().includes(term));
     }, [bookSearch, books]);
 
@@ -179,12 +210,42 @@ export function LoansPage() {
         return patrons.filter((p) => p.name.toLowerCase().includes(term));
     }, [patronSearch, patrons]);
 
-    const totalPages = Math.max(1, Math.ceil(loans.length / pageSize));
+    const filteredLoans = useMemo(() => {
+        const term = search.toLowerCase();
+        return loans.filter((loan) => {
+            const bookTitle =
+                loan.book?.title ??
+                books.find((b) => b.id === loan.book_id)?.title ??
+                `book #${loan.book_id}`;
+            const patronName =
+                loan.patron?.name ??
+                patrons.find((p) => p.id === loan.patron_id)?.name ??
+                `patron #${loan.patron_id}`;
+
+            const matchesTerm =
+                bookTitle.toLowerCase().includes(term) ||
+                patronName.toLowerCase().includes(term) ||
+                String(loan.book_id).includes(term) ||
+                String(loan.patron_id).includes(term);
+
+            const loanStatus = (loan.status ?? 'ongoing').toLowerCase();
+            const matchesStatus =
+                statusFilter === 'all' || loanStatus === statusFilter;
+
+            return matchesTerm && matchesStatus;
+        });
+    }, [books, loans, patrons, search, statusFilter]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredLoans.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const paginatedLoans = loans.slice(
+    const paginatedLoans = filteredLoans.slice(
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
+
+    useEffect(() => {
+        setPage(1);
+    }, [search, statusFilter, loans]);
 
     if (!authed || !admin) {
         return (
@@ -194,95 +255,204 @@ export function LoansPage() {
         );
     }
 
+    const emptyStateMessage =
+        loans.length === 0
+            ? 'No loans have been created yet.'
+            : filteredLoans.length === 0
+              ? 'No loans match your filters.'
+              : '';
+
+    const statusBadge = (status?: string) => {
+        const normalized = (status ?? 'ongoing').toLowerCase();
+        const base = 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium';
+        if (normalized === 'returned') return `${base} bg-brand-tertiary/30 text-brand-primary`;
+        if (normalized === 'lost') return `${base} bg-brand-secondary/10 text-brand-secondary`;
+        if (normalized === 'overdue') return `${base} bg-brand-softYellow text-brand-primary`;
+        return `${base} bg-brand-softGreen text-brand-primary`;
+    };
+
     return (
-        <div className="space-y-4 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">Loans</h1>
-                <p className="text-sm text-slate-600">All current and past loans.</p>
+                <p className="text-sm text-slate-600">
+                    Create, review, and manage book loans.
+                </p>
             </div>
 
-            <form
-                onSubmit={handleCreateLoan}
-                className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-            >
-                <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-brand-primary">Create a loan</h2>
-                    <span className="text-[11px] font-medium text-slate-500">Admin tools</span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <input
+                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
+                    placeholder="Search by book or patron..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-600">
+                        Showing {filteredLoans.length} of {loans.length} loans
+                    </span>
+                    <select
+                        className="w-36 rounded border border-slate-300 px-3 py-2 text-sm"
+                        value={statusFilter}
+                        onChange={(e) =>
+                            setStatusFilter(e.target.value as typeof statusFilter)
+                        }
+                    >
+                        <option value="all">All statuses</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="returned">Returned</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="lost">Lost</option>
+                    </select>
                 </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                    <div className="space-y-1">
-                        <input
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            placeholder="Search books..."
-                            value={bookSearch}
-                            onChange={(e) => setBookSearch(e.target.value)}
-                        />
-                        <select
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            value={formBookId}
-                            onChange={(e) => setFormBookId(Number(e.target.value))}
-                            required
-                        >
-                            <option value="">Select a book</option>
-                            {filteredBooks.map((book) => (
-                                <option key={book.id} value={book.id}>
-                                    {book.title}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+            </div>
 
-                    <div className="space-y-1">
-                        <input
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            placeholder="Search patrons..."
-                            value={patronSearch}
-                            onChange={(e) => setPatronSearch(e.target.value)}
-                        />
-                        <select
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            value={formPatronId}
-                            onChange={(e) => setFormPatronId(Number(e.target.value))}
-                            required
-                        >
-                            <option value="">Select a patron</option>
-                            {filteredPatrons.map((patron) => (
-                                <option key={patron.id} value={patron.id}>
-                                    {patron.name}
-                                </option>
-                            ))}
-                        </select>
+            {admin && (
+                <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div>
+                                <h2 className="text-sm font-semibold text-brand-primary">
+                                    {editingLoan
+                                        ? `Edit loan #${editingLoan.id}`
+                                        : 'Create new loan'}
+                                </h2>
+                                <p className="text-xs text-slate-600">
+                                    Assign a book to a patron and set due date.
+                                </p>
+                            </div>
+                            {editingLoan && (
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="text-xs text-slate-600 hover:text-slate-800"
+                                >
+                                    Cancel edit
+                                </button>
+                            )}
+                        </div>
+                        <span className="text-[11px] font-medium text-slate-500">
+                            Admin tools
+                        </span>
                     </div>
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <div className="space-y-1">
+                                <label
+                                    htmlFor="loan-book-search"
+                                    className="block text-xs font-medium text-slate-700"
+                                >
+                                    Search books
+                                </label>
+                                <input
+                                    id="loan-book-search"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    placeholder="Search books..."
+                                    value={bookSearch}
+                                    onChange={(e) => setBookSearch(e.target.value)}
+                                />
+                                <select
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    value={formBookId}
+                                    onChange={(e) => setFormBookId(Number(e.target.value))}
+                                    required
+                                >
+                                    <option value="">Select a book</option>
+                                    {filteredBooks.map((book) => (
+                                        <option key={book.id} value={book.id}>
+                                            {book.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-medium text-slate-700">Due date *</label>
-                        <input
-                            type="date"
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            value={formDueDate}
-                            onChange={(e) => setFormDueDate(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-medium text-slate-700">Loan date</label>
-                        <input
-                            type="date"
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
-                            value={formLoanDate}
-                            onChange={(e) => setFormLoanDate(e.target.value)}
-                            placeholder="Defaults to today"
-                        />
-                    </div>
-                </div>
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
-                >
-                    {isSubmitting ? 'Creating...' : 'Create loan'}
-                </button>
-            </form>
+                            <div className="space-y-1">
+                                <label
+                                    htmlFor="loan-patron-search"
+                                    className="block text-xs font-medium text-slate-700"
+                                >
+                                    Search patrons
+                                </label>
+                                <input
+                                    id="loan-patron-search"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    placeholder="Search patrons..."
+                                    value={patronSearch}
+                                    onChange={(e) => setPatronSearch(e.target.value)}
+                                />
+                                <select
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    value={formPatronId}
+                                    onChange={(e) => setFormPatronId(Number(e.target.value))}
+                                    required
+                                >
+                                    <option value="">Select a patron</option>
+                                    {filteredPatrons.map((patron) => (
+                                        <option key={patron.id} value={patron.id}>
+                                            {patron.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <div className="space-y-1">
+                                <label
+                                    className="block text-xs font-medium text-slate-700"
+                                    htmlFor="loan-due-date"
+                                >
+                                    Due date *
+                                </label>
+                                <input
+                                    id="loan-due-date"
+                                    type="date"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    value={formDueDate}
+                                    onChange={(e) => setFormDueDate(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label
+                                    className="block text-xs font-medium text-slate-700"
+                                    htmlFor="loan-loaned-at"
+                                >
+                                    Loan date
+                                </label>
+                                <input
+                                    id="loan-loaned-at"
+                                    type="date"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    value={formLoanDate}
+                                    onChange={(e) => setFormLoanDate(e.target.value)}
+                                    placeholder="Defaults to today"
+                                />
+                            </div>
+                        </div>
+
+                        {formError && (
+                            <p className="text-sm text-red-600 whitespace-pre-wrap">{formError}</p>
+                        )}
+                        {successMessage && (
+                            <p className="text-sm text-green-700">{successMessage}</p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                        >
+                            {isSubmitting
+                                ? editingLoan
+                                    ? 'Saving...'
+                                    : 'Creating...'
+                                : editingLoan
+                                  ? 'Save changes'
+                                  : 'Create loan'}
+                        </button>
+                    </form>
+                </section>
+            )}
 
             {isLoading && (
                 <p className="text-sm text-slate-600">Loading loans...</p>
@@ -290,168 +460,163 @@ export function LoansPage() {
 
             {error && <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>}
 
-            {!isLoading && !error && loans.length === 0 && (
-                <p className="text-sm text-slate-600">No loans found.</p>
+            {isLoading && (
+                <p className="text-sm text-slate-600">Loading loans...</p>
             )}
 
-            {!isLoading && !error && loans.length > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <table className="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
-                            <tr>
-                                <th className="px-4 py-2">Book</th>
-                                <th className="px-4 py-2">Patron</th>
-                                <th className="px-4 py-2">Loan date</th>
-                                <th className="px-4 py-2">Due date</th>
-                                <th className="px-4 py-2 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {paginatedLoans.map((loan) => {
-                                const bookTitle =
-                                    loan.book?.title ??
-                                    books.find((b) => b.id === loan.book_id)?.title ??
-                                    `Book #${loan.book_id}`;
-                                const patronName =
-                                    loan.patron?.name ??
-                                    patrons.find((p) => p.id === loan.patron_id)?.name ??
-                                    `Patron #${loan.patron_id}`;
+            {error && <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>}
 
-                                return (
-                                <tr key={loan.id}>
-                                    <td className="px-4 py-2">
-                                        {bookTitle}
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        {patronName}
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        {loan.loaned_at
-                                            ? new Date(loan.loaned_at).toLocaleDateString()
-                                            : loan.loan_date
-                                              ? new Date(loan.loan_date).toLocaleDateString()
-                                              : '—'}
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        {loan.due_at
-                                            ? new Date(loan.due_at).toLocaleDateString()
-                                            : loan.due_date
-                                              ? new Date(loan.due_date).toLocaleDateString()
-                                              : '—'}
-                                    </td>
-                                    <td className="px-4 py-2 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedLoan(loan)}
-                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50"
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleReturn(loan.id)}
-                                                disabled={deletingId === loan.id}
-                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 disabled:opacity-60"
-                                            >
-                                                {deletingId === loan.id ? 'Working...' : 'Return'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDelete(loan.id)}
-                                                disabled={deletingId === loan.id}
-                                                className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
-                                            >
-                                                {deletingId === loan.id ? 'Working...' : 'Delete'}
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )})}
-                        </tbody>
-                    </table>
-                    {totalPages > 1 && (
-                        <div className="mt-4 flex items-center justify-between text-sm text-slate-700">
-                            <button
-                                type="button"
-                                disabled={currentPage === 1}
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
-                            >
-                                Previous
-                            </button>
-                            <span>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button
-                                type="button"
-                                disabled={currentPage === totalPages}
-                                onClick={() =>
-                                    setPage((p) => Math.min(totalPages, p + 1))
-                                }
-                                className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
-                            >
-                                Next
-                            </button>
+            {!isLoading && !error && (
+                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between">
+                        <h2 className="text-sm font-semibold text-brand-primary">All loans</h2>
+                        <span className="text-xs text-slate-600">
+                            Showing {filteredLoans.length} of {loans.length} loans
+                        </span>
+                    </div>
+                    {filteredLoans.length === 0 ? (
+                        <p className="mt-3 text-sm text-slate-600">{emptyStateMessage}</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-200 text-sm">
+                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                                    <tr>
+                                        <th scope="col" className="px-4 py-2">
+                                            Book
+                                        </th>
+                                        <th scope="col" className="px-4 py-2">
+                                            Patron
+                                        </th>
+                                        <th scope="col" className="px-4 py-2">
+                                            Loan date
+                                        </th>
+                                        <th scope="col" className="px-4 py-2">
+                                            Due date
+                                        </th>
+                                        <th scope="col" className="px-4 py-2">
+                                            Status
+                                        </th>
+                                        {admin && (
+                                            <th scope="col" className="px-4 py-2 text-right">
+                                                Actions
+                                            </th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {paginatedLoans.map((loan) => {
+                                        const bookTitle =
+                                            loan.book?.title ??
+                                            books.find((b) => b.id === loan.book_id)?.title ??
+                                            `Book #${loan.book_id}`;
+                                        const patronName =
+                                            loan.patron?.name ??
+                                            patrons.find((p) => p.id === loan.patron_id)?.name ??
+                                            `Patron #${loan.patron_id}`;
+
+                                        return (
+                                            <tr key={loan.id}>
+                                                <td className="px-4 py-2">{bookTitle}</td>
+                                                <td className="px-4 py-2">{patronName}</td>
+                                                <td className="px-4 py-2">
+                                                    {loan.loaned_at
+                                                        ? new Date(loan.loaned_at).toLocaleDateString()
+                                                        : loan.loan_date
+                                                          ? new Date(loan.loan_date).toLocaleDateString()
+                                                          : '—'}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {loan.due_at
+                                                        ? new Date(loan.due_at).toLocaleDateString()
+                                                        : loan.due_date
+                                                          ? new Date(loan.due_date).toLocaleDateString()
+                                                          : '—'}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <span className={statusBadge(loan.status)}>
+                                                        {(loan.status ?? 'ongoing')
+                                                            .toString()
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                            (loan.status ?? 'ongoing')
+                                                                .toString()
+                                                                .slice(1)}
+                                                    </span>
+                                                </td>
+                                                {admin && (
+                                                    <td className="px-4 py-2 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => startEdit(loan)}
+                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50"
+                                                                aria-label={`Edit loan for ${bookTitle}`}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleReturn(loan.id)}
+                                                                disabled={deletingId === loan.id}
+                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 disabled:opacity-60"
+                                                                aria-label={`Return book ${bookTitle}`}
+                                                            >
+                                                                {deletingId === loan.id ? 'Working...' : 'Return'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDelete(loan.id)}
+                                                                disabled={deletingId === loan.id}
+                                                                className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
+                                                                aria-label={`Delete loan for ${bookTitle}`}
+                                                            >
+                                                                {deletingId === loan.id ? 'Working...' : 'Delete'}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                            <div className="mt-4 flex flex-col gap-2 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                                <span>
+                                    Showing{' '}
+                                    {filteredLoans.length === 0
+                                        ? 0
+                                        : (currentPage - 1) * pageSize + 1}{' '}
+                                    -{' '}
+                                    {Math.min(currentPage * pageSize, filteredLoans.length)} of{' '}
+                                    {filteredLoans.length} loans
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                        className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                                    >
+                                        Previous
+                                    </button>
+                                    <span>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                        className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
-                </div>
+                </section>
             )}
 
-            {selectedLoan && (
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-sm font-semibold text-brand-primary">
-                            Loan details
-                        </h2>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedLoan(null)}
-                            className="text-xs text-slate-600 hover:text-slate-800"
-                        >
-                            Close
-                        </button>
-                    </div>
-                    <dl className="mt-3 grid gap-2 text-sm text-slate-700 md:grid-cols-2">
-                        <div>
-                            <dt className="font-medium text-slate-600">Book</dt>
-                            <dd>{selectedLoan.book?.title ?? `Book #${selectedLoan.book_id}`}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-slate-600">Patron</dt>
-                            <dd>
-                                {selectedLoan.patron?.name ?? `Patron #${selectedLoan.patron_id}`}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-slate-600">Loan date</dt>
-                            <dd>
-                                {selectedLoan.loan_date
-                                    ? new Date(selectedLoan.loan_date).toLocaleDateString()
-                                    : '—'}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-slate-600">Due date</dt>
-                            <dd>
-                                {selectedLoan.due_date
-                                    ? new Date(selectedLoan.due_date).toLocaleDateString()
-                                    : '—'}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-slate-600">Return date</dt>
-                            <dd>
-                                {selectedLoan.return_date
-                                    ? new Date(selectedLoan.return_date).toLocaleDateString()
-                                    : selectedLoan.returned_at
-                                      ? new Date(selectedLoan.returned_at).toLocaleDateString()
-                                      : '—'}
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-            )}
-        </div>
+        </main>
     );
 }

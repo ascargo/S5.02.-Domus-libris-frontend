@@ -8,8 +8,15 @@ export type CreateBookPayload = Pick<Book, 'title' | 'author' | 'isbn'> &
 
 export type UpdateBookPayload = Partial<CreateBookPayload>;
 
-export async function getBooks(): Promise<Book[]> {
-    const response = await apiClient.get<ApiResponse<Book[]>>('/books');
+type GetBooksParams = {
+    page?: number;
+    per_page?: number | 'all';
+};
+
+export async function getBooks(params?: GetBooksParams): Promise<Book[]> {
+    const response = await apiClient.get<ApiResponse<Book[]>>('/books', {
+        params,
+    });
     return response.data.data;
 }
 

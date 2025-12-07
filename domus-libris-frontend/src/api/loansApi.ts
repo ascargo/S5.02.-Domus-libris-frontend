@@ -10,14 +10,22 @@ export interface CreateLoanPayload {
     due_at: string;
 }
 
-export async function getLoans(): Promise<Loan[]> {
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans');
+type LoanQuery = {
+    page?: number;
+    per_page?: number | 'all';
+};
+
+export async function getLoans(params?: LoanQuery): Promise<Loan[]> {
+    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans', {
+        params,
+    });
     return response.data.data;
 }
 
-export async function getMyLoans(): Promise<Loan[]> {
-    // patron-scoped endpoint; adjust path here if backend differs
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/my/loans');
+export async function getMyLoans(params?: LoanQuery): Promise<Loan[]> {
+    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my', {
+        params,
+    });
     return response.data.data;
 }
 
@@ -31,6 +39,17 @@ export async function updateLoan(
     payload: Partial<Loan>
 ): Promise<Loan> {
     const response = await apiClient.put<ApiResponse<Loan>>(`/loans/${id}`, payload);
+    return response.data.data;
+}
+
+export async function requestLoanExtension(
+    loanId: number,
+    payload: { due_at: string }
+): Promise<Loan> {
+    const response = await apiClient.put<ApiResponse<Loan>>(
+        `/loans/my/${loanId}`,
+        payload
+    );
     return response.data.data;
 }
 
