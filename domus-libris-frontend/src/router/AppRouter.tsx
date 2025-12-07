@@ -10,6 +10,8 @@ import { MyLoansPage } from '../pages/MyLoansPage';
 import { MyProfilePage } from '../pages/MyProfilePage';
 import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
+import { AboutPage } from '../pages/AboutPage';
+import { BecomePatronPage } from '../pages/BecomePatronPage';
 
 export function AppRouter() {
     return (
@@ -17,6 +19,8 @@ export function AppRouter() {
             <AppLayout>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/become-a-patron" element={<BecomePatronPage />} />
                     <Route path="/books" element={<BooksPage />} />
                     <Route path="/admin/books" element={<BooksPage />} />
                     <Route path="/dashboard" element={<DashboardPage />} />

@@ -1,6 +1,11 @@
 // src/api/authApi.ts
 import { apiClient } from './apiClient';
-import type { LoginCredentials, LoginResponse, User } from '../types/auth';
+import type {
+    LoginCredentials,
+    LoginResponse,
+    RegisterPayload,
+    User,
+} from '../types/auth';
 
 interface RawLoginResponse {
     access_token: string;
@@ -20,6 +25,27 @@ export async function login(
 
     if (!data.access_token) {
         throw new Error('Login response did not contain an access_token');
+    }
+
+    return {
+        token: data.access_token,
+        tokenType: data.token_type,
+        user: data.user,
+    };
+}
+
+export async function register(
+    payload: RegisterPayload
+): Promise<LoginResponse> {
+    const response = await apiClient.post<RawLoginResponse>(
+        '/auth/register',
+        payload
+    );
+
+    const data = response.data;
+
+    if (!data.access_token) {
+        throw new Error('Register response did not contain an access_token');
     }
 
     return {

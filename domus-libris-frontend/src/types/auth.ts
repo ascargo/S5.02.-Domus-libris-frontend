@@ -12,6 +12,13 @@ export interface LoginCredentials {
     password: string;
 }
 
+export interface RegisterPayload {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
+
 export interface LoginResponse {
     token: string;       // our normalized token field
     tokenType: string;   // "Bearer"

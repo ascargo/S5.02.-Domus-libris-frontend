@@ -45,6 +45,9 @@ export async function getMyPatronProfile(): Promise<Patron> {
 export async function updateMyPatronProfile(
     payload: UpdatePatronPayload
 ): Promise<Patron> {
-    const response = await apiClient.put<ApiResponse<Patron>>('/patrons/me', payload);
+    const response = await apiClient.put<ApiResponse<Patron>>(
+        '/patrons/me',
+        payload
+    );
     return response.data.data;
 }

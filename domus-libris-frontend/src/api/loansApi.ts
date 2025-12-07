@@ -1,4 +1,5 @@
 // src/api/loansApi.ts
+import axios from 'axios';
 import { apiClient } from './apiClient';
 import type { ApiResponse } from '../types/api';
 import type { Loan } from '../types/loan';
@@ -23,10 +24,21 @@ export async function getLoans(params?: LoanQuery): Promise<Loan[]> {
 }
 
 export async function getMyLoans(params?: LoanQuery): Promise<Loan[]> {
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my', {
-        params,
-    });
-    return response.data.data;
+    try {
+        const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my', {
+            params,
+        });
+        return response.data.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            // Some backends expose the patron route as /my/loans instead.
+            const fallback = await apiClient.get<ApiResponse<Loan[]>>('/my/loans', {
+                params,
+            });
+            return fallback.data.data;
+        }
+        throw error;
+    }
 }
 
 export async function createLoan(payload: CreateLoanPayload): Promise<Loan> {
