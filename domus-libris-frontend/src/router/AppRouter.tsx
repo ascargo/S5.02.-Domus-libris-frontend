@@ -8,6 +8,7 @@ import { PatronsPage } from '../pages/PatronsPage';
 import { PatronDetailPage } from '../pages/PatronDetailPage';
 import { LoansPage } from '../pages/LoansPage';
 import { MyLoansPage } from '../pages/MyLoansPage';
+import { MyProfilePage } from '../pages/MyProfilePage';
 import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { isAdmin } from '../auth/auth';
@@ -29,6 +30,7 @@ export function AppRouter() {
                     <Route path="/patrons/:id" element={<PatronDetailPage />} />
                     <Route path="/loans" element={<LoansPage />} />
                     <Route path="/my-loans" element={<MyLoansPage />} />
+                    <Route path="/my-profile" element={<MyProfilePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>

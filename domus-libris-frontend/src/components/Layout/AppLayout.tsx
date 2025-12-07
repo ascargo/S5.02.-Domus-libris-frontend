@@ -65,6 +65,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                             </Link>
                         )}
                         {authenticated && (
+                            <Link to="/my-profile" className="hover:text-slate-200">
+                                My profile
+                            </Link>
+                        )}
+                        {authenticated && (
                             <Link to="/dashboard" className="hover:text-slate-200">
                                 Dashboard
                             </Link>
