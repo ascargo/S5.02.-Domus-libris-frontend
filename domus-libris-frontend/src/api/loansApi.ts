@@ -1,4 +1,5 @@
 // src/api/loansApi.ts
+import axios from 'axios';
 import { apiClient } from './apiClient';
 import type { ApiResponse } from '../types/api';
 import type { Loan } from '../types/loan';
@@ -10,15 +11,34 @@ export interface CreateLoanPayload {
     due_at: string;
 }
 
-export async function getLoans(): Promise<Loan[]> {
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans');
+type LoanQuery = {
+    page?: number;
+    per_page?: number | 'all';
+};
+
+export async function getLoans(params?: LoanQuery): Promise<Loan[]> {
+    const response = await apiClient.get<ApiResponse<Loan[]>>('/loans', {
+        params,
+    });
     return response.data.data;
 }
 
-export async function getMyLoans(): Promise<Loan[]> {
-    // patron-scoped endpoint; adjust path here if backend differs
-    const response = await apiClient.get<ApiResponse<Loan[]>>('/my/loans');
-    return response.data.data;
+export async function getMyLoans(params?: LoanQuery): Promise<Loan[]> {
+    try {
+        const response = await apiClient.get<ApiResponse<Loan[]>>('/loans/my', {
+            params,
+        });
+        return response.data.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            // Some backends expose the patron route as /my/loans instead.
+            const fallback = await apiClient.get<ApiResponse<Loan[]>>('/my/loans', {
+                params,
+            });
+            return fallback.data.data;
+        }
+        throw error;
+    }
 }
 
 export async function createLoan(payload: CreateLoanPayload): Promise<Loan> {

@@ -35,3 +35,18 @@ export async function updatePatron(
 export async function deletePatron(id: number): Promise<void> {
     await apiClient.delete(`/patrons/${id}`);
 }
+
+export async function getMyPatronProfile(): Promise<Patron> {
+    const response = await apiClient.get<ApiResponse<Patron>>('/patrons/me');
+    return response.data.data;
+}
+
+export async function updateMyPatronProfile(
+    payload: UpdatePatronPayload
+): Promise<Patron> {
+    const response = await apiClient.put<ApiResponse<Patron>>(
+        '/patrons/me',
+        payload
+    );
+    return response.data.data;
+}
