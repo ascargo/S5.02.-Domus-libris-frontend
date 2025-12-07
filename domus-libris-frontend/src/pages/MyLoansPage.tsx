@@ -16,7 +16,7 @@ export function MyLoansPage() {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await getMyLoans();
+            const data = await getMyLoans({ per_page: 'all' });
             setLoans(data);
         } catch (err: unknown) {
             console.error('Error loading my loans:', err);

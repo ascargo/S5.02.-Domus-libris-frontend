@@ -54,6 +54,17 @@ export async function updateLoan(
     return response.data.data;
 }
 
+export async function requestLoanExtension(
+    loanId: number,
+    payload: { due_at: string }
+): Promise<Loan> {
+    const response = await apiClient.put<ApiResponse<Loan>>(
+        `/loans/my/${loanId}`,
+        payload
+    );
+    return response.data.data;
+}
+
 export async function deleteLoan(id: number): Promise<void> {
     await apiClient.delete(`/loans/${id}`);
 }
