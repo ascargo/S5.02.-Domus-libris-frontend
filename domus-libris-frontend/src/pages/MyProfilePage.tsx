@@ -6,7 +6,9 @@ import {
     updateMyPatronProfile,
     type UpdatePatronPayload,
 } from '../api/patronsApi';
+import { getMyLoans } from '../api/loansApi';
 import type { Patron } from '../types/patron';
+import type { Loan } from '../types/loan';
 import { isLoggedIn } from '../auth/auth';
 import { Link } from 'react-router-dom';
 
@@ -20,6 +22,9 @@ export function MyProfilePage() {
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [myLoans, setMyLoans] = useState<Loan[]>([]);
+    const [loansLoading, setLoansLoading] = useState(false);
+    const [loansError, setLoansError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!authed) return;
@@ -47,6 +52,16 @@ export function MyProfilePage() {
             }
         }
         loadProfile();
+    }, [authed]);
+
+    useEffect(() => {
+        if (!authed) return;
+        setLoansLoading(true);
+        setLoansError(null);
+        getMyLoans()
+            .then(setMyLoans)
+            .catch(() => setLoansError('Could not load your loans.'))
+            .finally(() => setLoansLoading(false));
     }, [authed]);
 
     if (!authed) {
@@ -132,6 +147,82 @@ export function MyProfilePage() {
                         {isSubmitting ? 'Saving...' : 'Save changes'}
                     </button>
                 </form>
+            )}
+
+            {authed && (
+                <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-brand-primary">
+                                My loans
+                            </h2>
+                            <p className="text-xs text-slate-600">
+                                Loans associated with your account.
+                            </p>
+                        </div>
+                    </div>
+
+                    {loansLoading && (
+                        <p className="text-sm text-slate-600">Loading your loans...</p>
+                    )}
+                    {loansError && (
+                        <p className="text-sm text-red-600 whitespace-pre-wrap">
+                            {loansError}
+                        </p>
+                    )}
+                    {!loansLoading && !loansError && myLoans.length === 0 && (
+                        <p className="text-sm text-slate-600">
+                            You don&apos;t have any loans yet.
+                        </p>
+                    )}
+
+                    {!loansLoading && !loansError && myLoans.length > 0 && (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-200 text-sm">
+                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                                    <tr>
+                                        <th className="px-4 py-2">Book</th>
+                                        <th className="px-4 py-2">Loan date</th>
+                                        <th className="px-4 py-2">Due date</th>
+                                        <th className="px-4 py-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {myLoans.map((loan) => (
+                                        <tr key={loan.id}>
+                                            <td className="px-4 py-2">
+                                                {loan.book?.title ?? `Book #${loan.book_id}`}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {loan.loaned_at
+                                                    ? new Date(
+                                                          loan.loaned_at
+                                                      ).toLocaleDateString()
+                                                    : loan.loan_date
+                                                      ? new Date(
+                                                            loan.loan_date
+                                                        ).toLocaleDateString()
+                                                      : '—'}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {loan.due_at
+                                                    ? new Date(loan.due_at).toLocaleDateString()
+                                                    : loan.due_date
+                                                      ? new Date(
+                                                            loan.due_date
+                                                        ).toLocaleDateString()
+                                                      : '—'}
+                                            </td>
+                                            <td className="px-4 py-2 capitalize">
+                                                {loan.status ?? 'ongoing'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </section>
             )}
         </div>
     );
