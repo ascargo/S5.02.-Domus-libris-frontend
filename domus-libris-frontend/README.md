@@ -48,12 +48,12 @@ Admin area
 1. Clone repositories
    Backend:
 
-git clone https://github.com/ascargo/Sprint5.-lms_api.git - domus-libris-api
+git clone https://github.com/ascargo/Sprint5.-lms_api.git
 cd domus-libris-api
 
 Frontend:
-git clone https://github.com/ascargo/S5.02.-Domus-libris-frontend.git - domus-libris-frontend
-cd domus-libris-frontend
+git clone https://github.com/ascargo/S5.02.-Domus-libris-frontend.git
+cd S5.02.-Domus-libris-frontend/domus-libris-frontend
 
 ```
 
@@ -112,10 +112,6 @@ All private requests require:
 Authorization: Bearer <TOKEN>
 Accept: application/json
 
-
-Seeder credentials (if provided by backend):
-- Admin: `admin@example.com` / `password`
-- Patron: `user@example.com` / `password`
 
 📚 Features (Frontend)
 - Public: Home, About, Catalogue, Become-a-patron signup, Login.
