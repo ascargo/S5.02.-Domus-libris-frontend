@@ -164,7 +164,7 @@ export function PatronsPage() {
               : '';
 
     return (
-        <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">Patrons</h1>
                 <p className="text-sm text-slate-600">
@@ -174,13 +174,13 @@ export function PatronsPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <input
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
+                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     placeholder="Search by name or email..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
                 <select
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:w-48"
+                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:w-48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
                 >
@@ -190,7 +190,7 @@ export function PatronsPage() {
                 </select>
             </div>
 
-            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <section className="dl-card space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <h2 className="text-sm font-semibold text-brand-primary">
@@ -221,7 +221,7 @@ export function PatronsPage() {
                             </label>
                             <input
                                 id="patron-name"
-                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
@@ -237,7 +237,7 @@ export function PatronsPage() {
                             <input
                                 id="patron-email"
                                 type="email"
-                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -253,7 +253,7 @@ export function PatronsPage() {
                             <div className="flex items-center gap-2 md:max-w-xs">
                                 <select
                                     id="patron-role"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={role}
                                     onChange={(e) => setRole(e.target.value)}
                                 >
@@ -276,7 +276,7 @@ export function PatronsPage() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                            className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                         >
                             {isSubmitting
                                 ? editingPatron
@@ -290,7 +290,7 @@ export function PatronsPage() {
                             <button
                                 type="button"
                                 onClick={resetForm}
-                                className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                                className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             >
                                 Cancel edit
                             </button>
@@ -306,7 +306,7 @@ export function PatronsPage() {
             {error && <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>}
 
             {!isLoading && !error && (
-                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section className="dl-card">
                     <div className="mb-2 flex items-center justify-between">
                         <h2 className="text-sm font-semibold text-brand-primary">All patrons</h2>
                         <span className="text-xs text-slate-600">
@@ -317,16 +317,16 @@ export function PatronsPage() {
                         <p className="mt-3 text-sm text-slate-600">{emptyStateMessage}</p>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                            <table className="dl-table min-w-full divide-y divide-slate-200 text-sm">
+                                <thead>
                                     <tr>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Name
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Email
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Role
                                         </th>
                                         <th scope="col" className="px-4 py-2 text-right">
@@ -339,10 +339,10 @@ export function PatronsPage() {
                                         const patronRole =
                                             (patron as { role?: string }).role ?? 'patron';
                                         return (
-                                            <tr key={patron.id}>
-                                                <td className="px-4 py-2">{patron.name}</td>
-                                                <td className="px-4 py-2">{patron.email}</td>
-                                                <td className="px-4 py-2">
+                                            <tr key={patron.id} className="hover:bg-brand-tertiary/10">
+                                                <td className="dl-table td">{patron.name}</td>
+                                                <td className="dl-table td">{patron.email}</td>
+                                                <td className="dl-table td">
                                                     <span
                                                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                                                             patronRole === 'admin'
@@ -358,7 +358,7 @@ export function PatronsPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => startEdit(patron)}
-                                                            className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50"
+                                                            className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                                             aria-label={`Edit patron ${patron.name}`}
                                                         >
                                                             Edit
@@ -367,7 +367,7 @@ export function PatronsPage() {
                                                             type="button"
                                                             onClick={() => handleDelete(patron.id)}
                                                             disabled={deletingId === patron.id}
-                                                            className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
+                                                            className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                                             aria-label={`Delete patron ${patron.name}`}
                                                         >
                                                             {deletingId === patron.id

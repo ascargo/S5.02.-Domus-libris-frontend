@@ -1,2 +1,37 @@
 @config "../tailwind.config.ts";
 @import "tailwindcss";
+
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    body {
+        @apply font-sans text-slate-900;
+        background: radial-gradient(
+                circle at 20% 20%,
+                rgba(245, 242, 178, 0.35),
+                transparent 35%
+            ),
+            radial-gradient(circle at 80% 0%, rgba(160, 193, 209, 0.25), transparent 30%),
+            linear-gradient(180deg, rgba(34, 51, 59, 0.05), rgba(34, 51, 59, 0));
+    }
+
+    h1, h2, h3 {
+        @apply font-display text-brand-primary tracking-tight;
+    }
+}
+
+@layer components {
+    .dl-card {
+        @apply rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm md:p-5;
+    }
+
+    .dl-table th {
+        @apply bg-brand-tertiary/20 px-4 py-2 text-left text-sm font-semibold text-brand-primary;
+    }
+
+    .dl-table td {
+        @apply px-4 py-2 text-sm;
+    }
+}

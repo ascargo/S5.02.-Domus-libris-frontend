@@ -114,7 +114,7 @@ export function MyProfilePage() {
     }
 
     return (
-        <div className="space-y-4 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-5xl space-y-4 px-4 py-8 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">My profile</h1>
                 <p className="text-sm text-slate-600">View and update your details.</p>
@@ -130,12 +130,12 @@ export function MyProfilePage() {
             {!isLoading && profile && (
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="dl-card space-y-3"
                 >
                     <div className="space-y-1">
                         <label className="text-xs font-medium text-slate-700">Name</label>
                         <input
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
@@ -145,7 +145,7 @@ export function MyProfilePage() {
                         <label className="text-xs font-medium text-slate-700">Email</label>
                         <input
                             type="email"
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -154,7 +154,7 @@ export function MyProfilePage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                        className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     >
                         {isSubmitting ? 'Saving...' : 'Save changes'}
                     </button>
@@ -162,7 +162,7 @@ export function MyProfilePage() {
             )}
 
             {authed && (
-                <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section className="dl-card space-y-3">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-semibold text-brand-primary">
@@ -190,22 +190,22 @@ export function MyProfilePage() {
 
                     {!loansLoading && !loansError && myLoans.length > 0 && (
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                            <table className="dl-table min-w-full divide-y divide-slate-200 text-sm">
+                                <thead>
                                     <tr>
-                                        <th className="px-4 py-2">Book</th>
-                                        <th className="px-4 py-2">Loan date</th>
-                                        <th className="px-4 py-2">Due date</th>
-                                        <th className="px-4 py-2">Status</th>
+                                        <th>Book</th>
+                                        <th>Loan date</th>
+                                        <th>Due date</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {myLoans.map((loan) => (
-                                        <tr key={loan.id}>
-                                            <td className="px-4 py-2">
+                                        <tr key={loan.id} className="hover:bg-brand-tertiary/10">
+                                            <td className="dl-table td">
                                                 {loan.book?.title ?? `Book #${loan.book_id}`}
                                             </td>
-                                            <td className="px-4 py-2">
+                                            <td className="dl-table td">
                                                 {loan.loaned_at
                                                     ? new Date(
                                                           loan.loaned_at
@@ -216,7 +216,7 @@ export function MyProfilePage() {
                                                         ).toLocaleDateString()
                                                       : '—'}
                                             </td>
-                                            <td className="px-4 py-2">
+                                            <td className="dl-table td">
                                                 {loan.due_at
                                                     ? new Date(loan.due_at).toLocaleDateString()
                                                     : loan.due_date
@@ -225,7 +225,7 @@ export function MyProfilePage() {
                                                         ).toLocaleDateString()
                                                       : '—'}
                                             </td>
-                                            <td className="px-4 py-2 capitalize">
+                                            <td className="dl-table td capitalize">
                                                 {loan.status ?? 'ongoing'}
                                             </td>
                                         </tr>
@@ -236,6 +236,6 @@ export function MyProfilePage() {
                     )}
                 </section>
             )}
-        </div>
+        </main>
     );
 }

@@ -94,27 +94,27 @@ export function DashboardPage() {
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <DashboardCard
                             title="Total books"
-                            value={data.books_count}
-                            accent="bg-brand-softGreen text-brand-primary"
+                            value={data.books_count ?? 0}
+                            accent="bg-brand-accent2/80 text-brand-primary"
                         />
                         <DashboardCard
                             title="Total loans"
-                            value={data.loans_count}
-                            accent="bg-brand-softYellow text-brand-primary"
+                            value={data.loans_count ?? 0}
+                            accent="bg-brand-accent1/80 text-brand-primary"
                         />
                         <DashboardCard
                             title="Active loans"
-                            value={data.active_loans_count}
-                            accent="bg-brand-tertiary text-brand-primary"
+                            value={data.active_loans_count ?? 0}
+                            accent="bg-brand-tertiary/80 text-brand-primary"
                         />
                         <DashboardCard
                             title="Active patrons"
-                            value={data.active_patrons_count}
-                            accent="bg-white text-brand-primary border border-brand-primary/20"
+                            value={data.active_patrons_count ?? 0}
+                            accent="bg-brand-secondary/80 text-white"
                         />
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="dl-card">
                         <div className="flex items-center justify-between">
                             <h2 className="text-sm font-semibold text-brand-primary">
                                 Recently added books
@@ -167,14 +167,18 @@ interface DashboardCardProps {
 
 function DashboardCard({ title, value, accent }: DashboardCardProps) {
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">{title}</p>
-            <div className="mt-2 flex items-baseline gap-2">
-                <span className={`rounded px-2 py-1 text-xs font-semibold ${accent}`}>
-                    {title}
-                </span>
-                <span className="text-2xl font-semibold text-brand-primary">
-                    {value}
+        <div className="dl-card bg-white/95">
+            <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                    <p className="text-sm text-slate-600">{title}</p>
+                    <p className="text-3xl font-semibold text-brand-primary">
+                        {value ?? 0}
+                    </p>
+                </div>
+                <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold ${accent}`}
+                >
+                    {value ?? 0}
                 </span>
             </div>
         </div>
@@ -300,31 +304,31 @@ interface StatsBarProps {
 
 function StatsBar({ summary }: StatsBarProps) {
     const max = Math.max(
-        summary.books_count,
-        summary.loans_count,
-        summary.active_loans_count || 1
+        summary.books_count ?? 0,
+        summary.loans_count ?? 0,
+        summary.active_loans_count ?? 1
     );
 
     const metrics = [
         {
             label: 'Books',
-            value: summary.books_count,
+            value: summary.books_count ?? 0,
             bar: 'bg-brand-primary',
         },
         {
             label: 'Loans',
-            value: summary.loans_count,
+            value: summary.loans_count ?? 0,
             bar: 'bg-brand-secondary',
         },
         {
             label: 'Active loans',
-            value: summary.active_loans_count,
+            value: summary.active_loans_count ?? 0,
             bar: 'bg-brand-tertiary',
         },
     ];
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="dl-card">
             <p className="text-sm font-medium text-slate-600 mb-3">Library overview</p>
             <div className="space-y-2">
                 {metrics.map((metric) => {
