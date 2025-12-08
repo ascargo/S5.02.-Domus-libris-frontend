@@ -43,62 +43,97 @@ export function AppLayout({ children }: AppLayoutProps) {
             ? 'Admin'
             : user?.role === 'patron'
                 ? 'Patron'
-                : user?.role ?? '';
+        : user?.role ?? '';
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
-            <header className="bg-brand-primary text-white">
-                <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-                    <Link to="/" className="text-lg font-semibold">
-                        Domus Libris
-                    </Link>
+        <div className="min-h-screen font-sans">
+            <header className="bg-brand-primary text-white shadow-brand">
+                <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+                    <div className="flex flex-col">
+                        <Link to="/" className="text-lg font-semibold tracking-tight">
+                            Domus Libris
+                        </Link>
+                        <span className="text-xs text-brand-tertiary/90">
+                            A home for shared stories
+                        </span>
+                    </div>
                     <div className="flex flex-col gap-1 text-sm">
-                        <nav className="flex flex-wrap items-center gap-4">
-                            <Link to="/" className="hover:text-slate-200">
+                        <nav className="flex flex-wrap items-center gap-3">
+                            <Link
+                                to="/"
+                                className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                            >
                                 Home
                             </Link>
-                            <Link to="/about" className="hover:text-slate-200">
+                            <Link
+                                to="/about"
+                                className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                            >
                                 About
                             </Link>
-                            <Link to="/books" className="hover:text-slate-200">
+                            <Link
+                                to="/books"
+                                className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                            >
                                 Catalogue
                             </Link>
 
                             {authenticated && (
-                                <Link to="/dashboard" className="hover:text-slate-200">
+                                <Link
+                                    to="/dashboard"
+                                    className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                >
                                     Dashboard
                                 </Link>
                             )}
 
                             {authenticated && admin && (
                                 <>
-                                    <Link to="/patrons" className="hover:text-slate-200">
+                                    <Link
+                                        to="/patrons"
+                                        className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                    >
                                         Patrons
                                     </Link>
-                                    <Link to="/loans" className="hover:text-slate-200">
+                                    <Link
+                                        to="/loans"
+                                        className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                    >
                                         Loans
                                     </Link>
                                 </>
                             )}
 
                             {authenticated && !admin && (
-                                <Link to="/my-loans" className="hover:text-slate-200">
+                                <Link
+                                    to="/my-loans"
+                                    className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                >
                                     My loans
                                 </Link>
                             )}
 
                             {authenticated && (
-                                <Link to="/my-profile" className="hover:text-slate-200">
+                                <Link
+                                    to="/my-profile"
+                                    className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                >
                                     My profile
                                 </Link>
                             )}
 
                             {!authenticated && (
                                 <>
-                                    <Link to="/become-a-patron" className="hover:text-slate-200">
+                                    <Link
+                                        to="/become-a-patron"
+                                        className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                    >
                                         Become a patron
                                     </Link>
-                                    <Link to="/login" className="hover:text-slate-200">
+                                    <Link
+                                        to="/login"
+                                        className="rounded px-2 py-1 text-slate-100 hover:text-brand-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand-primary"
+                                    >
                                         Login
                                     </Link>
                                 </>
@@ -108,7 +143,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                                 <button
                                     type="button"
                                     onClick={handleLogout}
-                                    className="rounded border border-slate-200/40 px-2 py-1 text-xs font-medium text-white transition hover:bg-slate-800"
+                                    className="rounded border border-slate-200/40 px-2 py-1 text-xs font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2 focus-visible:ring-offset-brand.primary"
                                 >
                                     Logout
                                 </button>
@@ -116,7 +151,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                         </nav>
 
                         {authenticated && user && (
-                            <span className="text-[11px] text-slate-200/80">
+                            <span className="text-[11px] text-brand-tertiary/90">
                                 Logged in as {user.name}
                                 {roleLabel ? ` (${roleLabel})` : ''}
                             </span>
@@ -125,7 +160,9 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+            <div className="bg-gradient-to-b from-brand-primary/5 via-brand-accent1/20 to-white">
+                <main className="mx-auto max-w-6xl space-y-4 px-4 py-6">{children}</main>
+            </div>
         </div>
     );
 }

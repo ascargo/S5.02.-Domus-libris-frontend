@@ -20,25 +20,29 @@ export function BecomePatronPage() {
 
     if (authed) {
         return (
-            <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
-                <h1 className="text-2xl font-semibold text-brand-primary">You are already logged in</h1>
-                <p className="text-slate-700">
-                    You can manage your profile or view your loans from here.
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                    <Link
-                        to="/my-profile"
-                        className="inline-flex items-center justify-center rounded bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-secondary"
-                    >
-                        Go to my profile
-                    </Link>
-                    <Link
-                        to="/dashboard"
-                        className="inline-flex items-center justify-center rounded border border-brand-primary px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-primary/10"
-                    >
-                        Go to dashboard
-                    </Link>
-                </div>
+            <main className="mx-auto max-w-5xl space-y-4 px-4 py-8 text-base leading-relaxed text-slate-900">
+                <section className="dl-card space-y-3 border-brand-accent1/80 bg-brand-accent1/60">
+                    <h1 className="text-2xl font-semibold text-brand-primary">
+                        You are already logged in
+                    </h1>
+                    <p className="text-slate-800">
+                        You can manage your profile or view your loans from here.
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <Link
+                            to="/my-profile"
+                            className="inline-flex items-center justify-center rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-secondary"
+                        >
+                            Go to my profile
+                        </Link>
+                        <Link
+                            to="/dashboard"
+                            className="inline-flex items-center justify-center rounded-lg border border-brand-primary px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-primary/10"
+                        >
+                            Go to dashboard
+                        </Link>
+                    </div>
+                </section>
             </main>
         );
     }
@@ -88,7 +92,7 @@ export function BecomePatronPage() {
     }
 
     return (
-        <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">Become a patron</h1>
                 <p className="text-sm text-slate-600">
@@ -96,7 +100,7 @@ export function BecomePatronPage() {
                 </p>
             </div>
 
-            <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="dl-card space-y-4">
                 <h2 className="text-sm font-semibold text-brand-primary">Create your account</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1">
@@ -108,7 +112,7 @@ export function BecomePatronPage() {
                         </label>
                         <input
                             id="patron-name"
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
@@ -125,7 +129,7 @@ export function BecomePatronPage() {
                         <input
                             id="patron-email"
                             type="email"
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -144,7 +148,7 @@ export function BecomePatronPage() {
                                 id="patron-password"
                                 type="password"
                                 minLength={8}
-                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -161,7 +165,7 @@ export function BecomePatronPage() {
                                 id="patron-password-confirm"
                                 type="password"
                                 minLength={8}
-                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                 value={passwordConfirm}
                                 onChange={(e) => setPasswordConfirm(e.target.value)}
                                 required
@@ -179,7 +183,7 @@ export function BecomePatronPage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                        className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-secondary disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     >
                         {isSubmitting ? 'Creating account...' : 'Create account'}
                     </button>

@@ -230,7 +230,7 @@ export function BooksPage() {
               : '';
 
     return (
-        <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">Books</h1>
                 <p className="text-sm text-slate-600">
@@ -240,7 +240,7 @@ export function BooksPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <input
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
+                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     placeholder="Search by title or author..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -251,7 +251,7 @@ export function BooksPage() {
             </div>
 
             {admin && (
-                <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section className="dl-card space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <h2 className="text-sm font-semibold text-brand-primary">
@@ -282,7 +282,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-title"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     required
@@ -297,7 +297,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-author"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={author}
                                     onChange={(e) => setAuthor(e.target.value)}
                                     required
@@ -312,7 +312,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-isbn"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={isbn}
                                     onChange={(e) => setIsbn(e.target.value)}
                                     placeholder="10 or 13 digits"
@@ -328,7 +328,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-year"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={year}
                                     onChange={(e) => setYear(e.target.value)}
                                     placeholder="Optional"
@@ -343,7 +343,7 @@ export function BooksPage() {
                                 </label>
                                 <select
                                     id="book-genre"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={genre}
                                     onChange={(e) => setGenre(e.target.value)}
                                 >
@@ -364,7 +364,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-collection"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={collection}
                                     onChange={(e) => setCollection(e.target.value)}
                                     placeholder="Optional"
@@ -379,7 +379,7 @@ export function BooksPage() {
                                 </label>
                                 <input
                                     id="book-location"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                     placeholder="Optional"
@@ -415,7 +415,7 @@ export function BooksPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                                className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                             >
                                 {isSubmitting
                                     ? editingBook
@@ -429,7 +429,7 @@ export function BooksPage() {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                                    className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                 >
                                     Cancel edit
                                 </button>
@@ -446,8 +446,8 @@ export function BooksPage() {
             {error && <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>}
 
             {!isLoading && !error && (
-                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div className="mb-2 flex items-center justify-between">
+                <section className="dl-card">
+                    <div className="mb-3 flex items-center justify-between">
                         <h2 className="text-sm font-semibold text-brand-primary">All books</h2>
                         <span className="text-xs text-slate-600">
                             Showing {filteredBooks.length} of {books.length} books
@@ -457,22 +457,22 @@ export function BooksPage() {
                         <p className="mt-3 text-sm text-slate-600">{emptyStateMessage}</p>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                            <table className="dl-table min-w-full divide-y divide-slate-200 text-sm">
+                                <thead>
                                     <tr>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Title
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Author
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Year
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             ISBN
                                         </th>
-                                        <th scope="col" className="px-4 py-2">
+                                        <th scope="col">
                                             Status
                                         </th>
                                         {admin && (
@@ -486,14 +486,14 @@ export function BooksPage() {
                                     {paginatedBooks.map((book) => {
                                         const normalized = normalizeStatus(book.status);
                                         return (
-                                            <tr key={book.id}>
-                                                <td className="px-4 py-2">{book.title}</td>
-                                                <td className="px-4 py-2">{book.author}</td>
-                                                <td className="px-4 py-2">
+                                            <tr key={book.id} className="hover:bg-brand-tertiary/10">
+                                                <td className="dl-table td">{book.title}</td>
+                                                <td className="dl-table td">{book.author}</td>
+                                                <td className="dl-table td">
                                                     {book.year ?? '—'}
                                                 </td>
-                                                <td className="px-4 py-2">{book.isbn}</td>
-                                                <td className="px-4 py-2">
+                                                <td className="dl-table td">{book.isbn}</td>
+                                                <td className="dl-table td">
                                                     {normalized ? (
                                                         <StatusTag status={normalized} />
                                                     ) : (

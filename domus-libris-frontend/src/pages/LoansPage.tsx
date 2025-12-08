@@ -272,7 +272,7 @@ export function LoansPage() {
     };
 
     return (
-        <main className="mx-auto max-w-5xl space-y-4 px-4 py-6 text-base leading-relaxed text-slate-900">
+        <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 text-base leading-relaxed text-slate-900">
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-brand-primary">Loans</h1>
                 <p className="text-sm text-slate-600">
@@ -282,7 +282,7 @@ export function LoansPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <input
-                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
+                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm sm:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                     placeholder="Search by book or patron..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -292,7 +292,7 @@ export function LoansPage() {
                         Showing {filteredLoans.length} of {loans.length} loans
                     </span>
                     <select
-                        className="w-36 rounded border border-slate-300 px-3 py-2 text-sm"
+                        className="w-36 rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                         value={statusFilter}
                         onChange={(e) =>
                             setStatusFilter(e.target.value as typeof statusFilter)
@@ -308,7 +308,7 @@ export function LoansPage() {
             </div>
 
             {admin && (
-                <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section className="dl-card space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div>
@@ -346,13 +346,13 @@ export function LoansPage() {
                                 </label>
                                 <input
                                     id="loan-book-search"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     placeholder="Search books..."
                                     value={bookSearch}
                                     onChange={(e) => setBookSearch(e.target.value)}
                                 />
                                 <select
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={formBookId}
                                     onChange={(e) => setFormBookId(Number(e.target.value))}
                                     required
@@ -375,13 +375,13 @@ export function LoansPage() {
                                 </label>
                                 <input
                                     id="loan-patron-search"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     placeholder="Search patrons..."
                                     value={patronSearch}
                                     onChange={(e) => setPatronSearch(e.target.value)}
                                 />
                                 <select
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={formPatronId}
                                     onChange={(e) => setFormPatronId(Number(e.target.value))}
                                     required
@@ -406,7 +406,7 @@ export function LoansPage() {
                                 <input
                                     id="loan-due-date"
                                     type="date"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={formDueDate}
                                     onChange={(e) => setFormDueDate(e.target.value)}
                                     required
@@ -422,7 +422,7 @@ export function LoansPage() {
                                 <input
                                     id="loan-loaned-at"
                                     type="date"
-                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                    className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                     value={formLoanDate}
                                     onChange={(e) => setFormLoanDate(e.target.value)}
                                     placeholder="Defaults to today"
@@ -440,7 +440,7 @@ export function LoansPage() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60"
+                            className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-secondary disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                         >
                             {isSubmitting
                                 ? editingLoan
@@ -467,7 +467,7 @@ export function LoansPage() {
             {error && <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>}
 
             {!isLoading && !error && (
-                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section className="dl-card">
                     <div className="mb-2 flex items-center justify-between">
                         <h2 className="text-sm font-semibold text-brand-primary">All loans</h2>
                         <span className="text-xs text-slate-600">
@@ -478,8 +478,8 @@ export function LoansPage() {
                         <p className="mt-3 text-sm text-slate-600">{emptyStateMessage}</p>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead className="bg-brand-tertiary/30 text-left font-semibold text-brand-primary">
+                            <table className="dl-table min-w-full divide-y divide-slate-200 text-sm">
+                                <thead>
                                     <tr>
                                         <th scope="col" className="px-4 py-2">
                                             Book
@@ -513,26 +513,25 @@ export function LoansPage() {
                                             loan.patron?.name ??
                                             patrons.find((p) => p.id === loan.patron_id)?.name ??
                                             `Patron #${loan.patron_id}`;
-
                                         return (
-                                            <tr key={loan.id}>
-                                                <td className="px-4 py-2">{bookTitle}</td>
-                                                <td className="px-4 py-2">{patronName}</td>
-                                                <td className="px-4 py-2">
+                                            <tr key={loan.id} className="hover:bg-brand-tertiary/10">
+                                                <td className="dl-table td">{bookTitle}</td>
+                                                <td className="dl-table td">{patronName}</td>
+                                                <td className="dl-table td">
                                                     {loan.loaned_at
                                                         ? new Date(loan.loaned_at).toLocaleDateString()
                                                         : loan.loan_date
                                                           ? new Date(loan.loan_date).toLocaleDateString()
                                                           : '—'}
                                                 </td>
-                                                <td className="px-4 py-2">
+                                                <td className="dl-table td">
                                                     {loan.due_at
                                                         ? new Date(loan.due_at).toLocaleDateString()
                                                         : loan.due_date
                                                           ? new Date(loan.due_date).toLocaleDateString()
                                                           : '—'}
                                                 </td>
-                                                <td className="px-4 py-2">
+                                                <td className="dl-table td">
                                                     <span className={statusBadge(loan.status)}>
                                                         {(loan.status ?? 'ongoing')
                                                             .toString()
@@ -549,7 +548,7 @@ export function LoansPage() {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => startEdit(loan)}
-                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50"
+                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                                                 aria-label={`Edit loan for ${bookTitle}`}
                                                             >
                                                                 Edit
@@ -558,7 +557,7 @@ export function LoansPage() {
                                                                 type="button"
                                                                 onClick={() => handleReturn(loan.id)}
                                                                 disabled={deletingId === loan.id}
-                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 disabled:opacity-60"
+                                                                className="rounded border border-slate-300 px-2 py-1 text-xs text-brand-primary hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                                                 aria-label={`Return book ${bookTitle}`}
                                                             >
                                                                 {deletingId === loan.id ? 'Working...' : 'Return'}
@@ -567,7 +566,7 @@ export function LoansPage() {
                                                                 type="button"
                                                                 onClick={() => handleDelete(loan.id)}
                                                                 disabled={deletingId === loan.id}
-                                                                className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
+                                                                className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand.secondary focus-visible:ring-offset-2"
                                                                 aria-label={`Delete loan for ${bookTitle}`}
                                                             >
                                                                 {deletingId === loan.id ? 'Working...' : 'Delete'}
